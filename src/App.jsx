@@ -1,15 +1,16 @@
-import { useMutation, useQuery } from "@tanstack/react-query";
+import { useMutation, useQuery, useQueryClient } from "@tanstack/react-query";
 import "./App.css";
 
 function App() {
-  // const queryKey = ["all-todos"];
-  // const queryFn = () => {
-  //   return fetch("https://jsonplaceholder.typicode.com/todos").then((res) =>
-  //     res.json()
-  //   );
-  // };
-  // const { data, isPending, isLoading } = useQuery({ queryKey, queryFn });
-  // console.log({ data, isPending, isLoading });
+  const queryClient = useQueryClient();
+  const queryKey = ["all-posts"];
+  const queryFn = () => {
+    return fetch("https://jsonplaceholder.typicode.com/posts").then((res) =>
+      res.json()
+    );
+  };
+  const { data, isPending, isLoading } = useQuery({ queryKey, queryFn });
+  console.log({ data, isPending, isLoading });
   const mutationFn = (data) => {
     return fetch("https://jsonplaceholder.typicode.com/posts", {
       method: "POST",
@@ -19,8 +20,7 @@ function App() {
       },
     }).then((response) => response.json());
   };
-  const { mutate, isPending } = useMutation({ mutationFn });
-  console.log(isPending);
+  const { mutate } = useMutation({ mutationFn });
   const clickHandler = () => {
     const data = {
       title: "foo",
@@ -28,7 +28,8 @@ function App() {
       userId: 1,
     };
     mutate(data, {
-      onSuccess: (data) => console.log(data),
+      onSuccess: (data) =>
+        queryClient.invalidateQueries({ queryKey: ["all-posts"] }),
       onError: (error) => console.log(error),
     });
   };
